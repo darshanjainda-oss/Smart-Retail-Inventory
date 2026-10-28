@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Smart Retail Inventory</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; display: grid; place-items: center;
+            padding: 24px; font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #0b1220, #172a46 55%, #234b72);
+            color: #172033;
+        }
+        .login-shell {
+            display: grid; grid-template-columns: 1fr 1fr; width: min(900px, 100%);
+            overflow: hidden; border-radius: 22px; background: #fff;
+            box-shadow: 0 28px 80px rgba(0,0,0,.28);
+        }
+        .brand-panel {
+            padding: 48px 40px; color: #fff;
+            background: linear-gradient(150deg, #15365b, #176b87);
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .brand-mark {
+            display: inline-grid; place-items: center; width: 56px; height: 56px;
+            border-radius: 16px; background: rgba(255,255,255,.16);
+            font-size: 25px; font-weight: 800; margin-bottom: 28px;
+        }
+        .brand-panel h1 { font-size: clamp(25px, 3vw, 36px); line-height: 1.16; margin: 0 0 14px; }
+        .brand-panel p { color: #d6e8f3; line-height: 1.7; margin: 0; }
+        .brand-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+        .brand-pills span { padding: 7px 10px; border-radius: 20px; background: rgba(255,255,255,.12); font-size: 12px; }
+        .form-panel { padding: 48px 40px; }
+        .form-panel h2 { margin: 0 0 8px; font-size: 27px; color: #111827; }
+        .subtext { color: #667085; line-height: 1.5; margin: 0 0 28px; font-size: 14px; }
+        .field { margin-bottom: 18px; }
+        .field label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #344054; }
+        .field input {
+            width: 100%; padding: 13px 14px; border: 1px solid #d0d5dd;
+            border-radius: 9px; font-size: 15px; outline: none; background: #fff;
+        }
+        .field input:focus { border-color: #177b9c; box-shadow: 0 0 0 3px rgba(23,123,156,.13); }
+        .captcha-wrap { margin: 20px 0; min-height: 78px; overflow-x: auto; }
+        .message {
+            margin: 0 0 18px; padding: 12px 14px; border-radius: 9px;
+            color: #9f2525; background: #fff0f0; border: 1px solid #ffd0d0;
+            font-size: 13px; line-height: 1.5;
+        }
+        .btn {
+            width: 100%; border: 0; border-radius: 9px; padding: 14px 16px;
+            color: #fff; background: #166b8a; font-size: 15px; font-weight: 700;
+            cursor: pointer;
+        }
+        .btn:hover { background: #125672; }
+        .security-note { font-size: 12px; color: #667085; text-align: center; margin: 18px 0 0; line-height: 1.5; }
+        @media (max-width: 700px) {
+            body { padding: 14px; }
+            .login-shell { grid-template-columns: 1fr; }
+            .brand-panel { padding: 28px; }
+            .brand-mark { margin-bottom: 16px; }
+            .brand-pills { margin-top: 18px; }
+            .form-panel { padding: 30px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell">
+        <section class="brand-panel">
+            <div class="brand-mark">SR</div>
+            <h1>Smart Retail<br>Inventory</h1>
+            <p>Manage stock, sales, invoices and expiry-aware inventory decisions from one secure workspace.</p>
+            <div class="brand-pills">
+                <span>Inventory</span>
+                <span>Sales & Billing</span>
+                <span>Demand Forecast</span>
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <h2>Admin sign in</h2>
+            <p class="subtext">Enter your administrator credentials and complete the human-verification check.</p>
+
+            {% if message %}
+                <div class="message" role="alert">{{ message }}</div>
+            {% endif %}
+
+            {% if not recaptcha_site_key %}
+                <div class="message" role="alert">
+                    CAPTCHA keys are not configured. Add RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY to the .env file.
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('login') }}" autocomplete="on">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text" required autocomplete="username" autofocus>
+                </div>
+
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" required autocomplete="current-password">
+                </div>
+
+                <div class="captcha-wrap">
+                    {% if recaptcha_site_key %}
+                        <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                    {% endif %}
+                </div>
+
+                <button class="btn" type="submit">Verify & Sign In</button>
+            </form>
+
+            <p class="security-note">Protected admin access for the Smart Retail Inventory prototype.</p>
+        </section>
+    </main>
+</body>
+</html>

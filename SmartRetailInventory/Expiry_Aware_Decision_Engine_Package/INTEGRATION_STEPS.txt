@@ -1,0 +1,94 @@
+SMART RETAIL INVENTORY — EXPIRY-AWARE DECISION ENGINE
+
+FILES IN THIS PACKAGE
+1. expiry_decision.py
+2. templates/expiry_decisions.html
+
+BEFORE YOU EDIT
+- Make a backup copy of app.py and templates/base.html.
+- Do not replace your existing app.py with a new file; it contains your existing routes.
+- This feature uses the existing products and sales tables, including products.expiry_date and sales.sale_date.
+- It does not change product stock, sales, expiry dates, or create purchase orders.
+
+STEP 1 — COPY FILES
+Copy expiry_decision.py into C:\SmartRetailInventory\expiry_decision.py
+Copy expiry_decisions.html into C:\SmartRetailInventory\templates\expiry_decisions.html
+
+STEP 2 — UPDATE app.py IMPORTS
+Add this import alongside the other project imports:
+
+from expiry_decision import get_expiry_decision_report
+
+STEP 3 — ADD THIS ROUTE TO app.py
+Put it with the other Flask routes, before the final if __name__ == "__main__": block.
+
+@app.route("/expiry-decisions")
+@login_required
+def expiry_decisions():
+    try:
+        report = get_expiry_decision_report()
+        return render_template(
+            "expiry_decisions.html",
+            decisions=report["decisions"],
+            summary=report["summary"],
+            lookback_days=report["lookback_days"],
+            near_expiry_days=report["near_expiry_days"],
+            error=None,
+        )
+    except Exception:
+        app.logger.exception("Expiry-aware decision report failed")
+        return render_template(
+            "expiry_decisions.html",
+            decisions=[],
+            summary={},
+            lookback_days=90,
+            near_expiry_days=30,
+            error=(
+                "Could not load expiry-aware decisions. Check the MySQL connection "
+                "and confirm products.expiry_date and sales.sale_date exist. "
+                "See the terminal for the technical error."
+            ),
+        ), 500
+
+IMPORTANT: This route uses the existing @login_required decorator. If your
+app.py uses a differently named login decorator, use that existing decorator.
+Your dashboard route must be named 'dashboard' for the template's Back button;
+if it is named differently, change url_for('dashboard') in the template.
+
+STEP 4 — ADD LINK TO templates/base.html
+Add the following link inside the existing sidebar/navigation, beside the
+Demand Forecast and Decision Simulator links:
+
+<a href="{{ url_for('expiry_decisions') }}" class="nav-link">Expiry-Aware Decisions</a>
+
+If your navigation uses a different CSS class, keep the href/url_for and use
+the same class as the existing navigation links. Do not delete existing links.
+
+STEP 5 — RUN AND TEST
+From PowerShell:
+  cd C:\SmartRetailInventory
+  python app.py
+
+Log in and open:
+  http://127.0.0.1:5000/expiry-decisions
+
+Check these cases with safe test data:
+- A product with no expiry date should show EXPIRY DATE MISSING.
+- A product whose expiry date is in the past and stock > 0 should show EXPIRED — DO NOT SELL.
+- A product expiring within 30 days should show a monitoring/review suggestion.
+- Sparse sales history should show Low confidence; do not claim its estimate is accurate.
+- Verify actual stock and sales did not change after opening the page.
+
+CALCULATION
+Expected daily demand = units sold in the previous 90 calendar days / 90.
+Expected sales before expiry = expected daily demand × days remaining.
+Estimated unsold stock = max(0, current stock − expected sales before expiry).
+Low confidence is shown when there are fewer than 8 sold units or fewer than
+8 distinct sales dates in the window. These are transparent project heuristics,
+not a validated forecasting model.
+
+LIMITATION TO EXPLAIN IN YOUR REPORT
+The database stores a single expiry date per product, not separate batches.
+The feature therefore supports product-level expiry-aware review, not full
+batch-level FEFO. It provides recommendations only; it is not a guarantee and
+does not automatically stop purchase orders or adjust stock.

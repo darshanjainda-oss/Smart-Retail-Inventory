@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Smart Retail Inventory</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            width: 350px;
+            max-width: calc(100% - 60px);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #166b8a;
+        }
+
+        p {
+            text-align: center;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .message {
+            background: #fff0f0;
+            color: #a11;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 22px;
+            text-align: center;
+            letter-spacing: 6px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background: #166b8a;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background: #125672;
+        }
+
+        a {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #166b8a;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h2>Email OTP Verification</h2>
+
+        <p>
+            A 6-digit verification code has been sent to your
+            configured administrator email address.
+        </p>
+
+        {% if message %}
+            <div class="message" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        {% if can_verify %}
+            <form method="POST"
+                  action="{{ url_for('verify_otp') }}">
+
+                <label for="otp">Enter 6-digit OTP</label>
+
+                <input
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    inputmode="numeric"
+                    pattern="[0-9]{6}"
+                    minlength="6"
+                    maxlength="6"
+                    autocomplete="one-time-code"
+                    placeholder="000000"
+                    required
+                >
+
+                <button type="submit">
+                    Verify OTP
+                </button>
+            </form>
+        {% endif %}
+
+        {% if can_resend %}
+            <form method="POST"
+                  action="{{ url_for('resend_otp') }}">
+
+                <button type="submit">
+                    Resend OTP
+                </button>
+            </form>
+        {% endif %}
+
+        <a href="{{ url_for('login') }}">
+            Back to Login
+        </a>
+
+    </div>
+</body>
+</html>

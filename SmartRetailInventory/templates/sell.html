@@ -1,0 +1,759 @@
+{% extends "base.html" %}
+
+{% block title %}Sell Product | Smart Retail Inventory{% endblock %}
+{% block page_heading %}Sell Product & Billing{% endblock %}
+
+{% block extra_head %}
+<style>
+    .sell-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(280px, .8fr);
+        gap: 20px;
+        align-items: start;
+    }
+
+    .sell-panel {
+        background: #fff;
+        border: 1px solid #e5eaf2;
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 8px 24px rgba(21,34,56,.06);
+    }
+
+    .sell-panel h2,
+    .sell-panel h3 {
+        margin-top: 0;
+    }
+
+    .sell-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .sell-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .sell-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .sell-field label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .sell-field input,
+    .sell-field select {
+        width: 100%;
+        min-height: 42px;
+    }
+
+    .sell-help {
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .sell-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+
+    .sell-alert {
+        padding: 12px 15px;
+        border-radius: 9px;
+        margin-bottom: 16px;
+        background: #e8f7ee;
+        color: #13733b;
+        border: 1px solid #c9edd6;
+    }
+
+    .sell-alert.error {
+        background: #fdecec;
+        color: #a82424;
+        border-color: #f9cccc;
+    }
+
+    .preview-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .preview-list li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 11px 0;
+        border-bottom: 1px solid #e5eaf2;
+        font-size: 13px;
+    }
+
+    .preview-amount {
+        font-weight: 650;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .preview-total {
+        font-size: 17px !important;
+        font-weight: 800;
+        color: #175cd3;
+        border-bottom: 0 !important;
+        padding-top: 16px !important;
+    }
+
+    .invoice-output {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        background: #f8fafc;
+        border: 1px solid #e5eaf2;
+        border-radius: 10px;
+        padding: 18px;
+        font: 13px/1.6 Consolas, "Courier New", monospace;
+    }
+
+    .invoice-panel {
+        margin-top: 20px;
+    }
+
+    @media (max-width: 850px) {
+        .sell-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 560px) {
+        .sell-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .sell-field.full {
+            grid-column: auto;
+        }
+    }
+
+    @media print {
+        .sidebar,
+        .topbar,
+        .page-footer,
+        .sell-intro,
+        .sell-layout,
+        .no-print {
+            display: none !important;
+        }
+
+        .main-area {
+            margin: 0 !important;
+        }
+
+        .page-content {
+            padding: 0 !important;
+        }
+
+        .invoice-panel {
+            box-shadow: none !important;
+            border: 0 !important;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="sell-intro" style="margin-bottom:20px">
+    <h2>Record a Sale</h2>
+    <p class="muted">
+        Enter sale details and the applicable GST rate.
+        The bill preview calculates taxes before you complete the sale.
+    </p>
+</div>
+
+{% if message %}
+    <div class="sell-alert
+        {% if 'successfully' not in message|lower %}error{% endif %}">
+        {{ message }}
+    </div>
+{% endif %}
+
+
+<div class="sell-layout">
+
+    <!-- SALE FORM -->
+
+    <form method="POST"
+          action="{{ url_for('sell_page') }}"
+          id="sellForm"
+          class="sell-panel">
+
+        <h2>Sale Details</h2>
+
+        <div class="sell-form-grid">
+
+            <!-- PRODUCT -->
+
+            <div class="sell-field full">
+                <label for="product_id">Select Product *</label>
+
+                <select name="product_id"
+                        id="product_id"
+                        required>
+
+                    <option value="">Choose a product</option>
+
+                    {% for product in products %}
+
+                        <option
+                            value="{{ product.product_id }}"
+                            data-price="{{ product.price }}"
+                            data-stock="{{ product.stock }}"
+                            data-expiry="{{ product.get('expiry_date') or '' }}"
+
+                            {% if request.form.get('product_id', '') == (product.product_id|string) %}
+                                selected
+                            {% endif %}
+                        >
+
+                            {{ product.name }}
+                            — Stock: {{ product.stock }}
+                            — ₹{{ "%.2f"|format(product.price|float) }}
+
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <span id="productInfo" class="sell-help">
+                    Select a product to view available stock.
+                </span>
+            </div>
+
+
+            <!-- CUSTOMER NAME -->
+
+            <div class="sell-field">
+                <label for="customer_name">Customer Name *</label>
+
+                <input
+                    type="text"
+                    id="customer_name"
+                    name="customer_name"
+                    maxlength="80"
+                    required
+                    autocomplete="name"
+                    value="{{ request.form.get('customer_name', '') }}"
+                    placeholder="e.g. Darshan Jain"
+                >
+            </div>
+
+
+            <!-- CUSTOMER PHONE -->
+
+            <div class="sell-field">
+                <label for="customer_phone">Customer Phone</label>
+
+                <input
+                    type="tel"
+                    id="customer_phone"
+                    name="customer_phone"
+                    inputmode="numeric"
+                    pattern="[0-9]{10}"
+                    maxlength="10"
+                    autocomplete="tel-national"
+                    value="{{ request.form.get('customer_phone', '') }}"
+                    placeholder="10 digit mobile number"
+                >
+
+                <span class="sell-help">
+                    Enter exactly 10 digits or leave blank.
+                </span>
+            </div>
+
+
+            <!-- QUANTITY -->
+
+            <div class="sell-field">
+                <label for="quantity">Quantity *</label>
+
+                <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    min="1"
+                    step="1"
+                    required
+                    value="{{ request.form.get('quantity', '1') }}"
+                >
+            </div>
+
+
+            <!-- DISCOUNT -->
+
+            <div class="sell-field">
+                <label for="discount_percent">Discount (%)</label>
+
+                <input
+                    type="number"
+                    id="discount_percent"
+                    name="discount_percent"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    required
+                    value="{{ request.form.get('discount_percent', '0') }}"
+                >
+            </div>
+
+
+            <!-- GST RATE: IMPORTANT FIELD -->
+
+            <div class="sell-field">
+                <label for="gst_rate">GST Rate (%) *</label>
+
+                <input
+                    type="number"
+                    id="gst_rate"
+                    name="gst_rate"
+                    min="0"
+                    max="40"
+                    step="0.01"
+                    required
+                    value="{{ request.form.get('gst_rate', '') }}"
+                    placeholder="Enter applicable rate"
+                >
+
+                <span class="sell-help">
+                    Enter the applicable product GST rate.
+                    Enter 0 only if no GST applies.
+                </span>
+            </div>
+
+
+            <!-- SUPPLY TYPE -->
+
+            <div class="sell-field">
+                <label for="supply_type">Supply Type *</label>
+
+                <select id="supply_type"
+                        name="supply_type"
+                        required>
+
+                    <option
+                        value="intra"
+                        {% if request.form.get('supply_type', 'intra') == 'intra' %}
+                            selected
+                        {% endif %}
+                    >
+                        Intra-state — CGST + SGST
+                    </option>
+
+                    <option
+                        value="inter"
+                        {% if request.form.get('supply_type') == 'inter' %}
+                            selected
+                        {% endif %}
+                    >
+                        Inter-state — IGST
+                    </option>
+
+                </select>
+
+                <span class="sell-help">
+                    Select the appropriate supply type.
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="sell-actions">
+
+            <button type="submit">
+                Complete Sale & Generate Invoice
+            </button>
+
+            <a href="{{ url_for('products') }}"
+               class="btn btn-secondary">
+                Back to Products
+            </a>
+
+        </div>
+
+    </form>
+
+
+    <!-- LIVE BILL PREVIEW -->
+
+    <aside class="sell-panel" aria-live="polite">
+
+        <h3>Bill Preview</h3>
+
+        <ul class="preview-list">
+
+            <li>
+                <span>Unit Price</span>
+                <span class="preview-amount" id="unitPrice">₹0.00</span>
+            </li>
+
+            <li>
+                <span>Quantity</span>
+                <span class="preview-amount" id="previewQuantity">1</span>
+            </li>
+
+            <li>
+                <span>Subtotal</span>
+                <span class="preview-amount" id="previewSubtotal">₹0.00</span>
+            </li>
+
+            <li>
+                <span>Discount</span>
+                <span class="preview-amount" id="previewDiscount">₹0.00</span>
+            </li>
+
+            <li>
+                <span>Taxable Amount</span>
+                <span class="preview-amount" id="previewTaxable">₹0.00</span>
+            </li>
+
+            <li>
+                <span id="cgstLabel">CGST</span>
+                <span class="preview-amount" id="previewCgst">₹0.00</span>
+            </li>
+
+            <li>
+                <span id="sgstLabel">SGST</span>
+                <span class="preview-amount" id="previewSgst">₹0.00</span>
+            </li>
+
+            <li>
+                <span id="igstLabel">IGST</span>
+                <span class="preview-amount" id="previewIgst">₹0.00</span>
+            </li>
+
+            <li>
+                <span>Total GST</span>
+                <span class="preview-amount" id="previewGst">₹0.00</span>
+            </li>
+
+            <li class="preview-total">
+                <span>Final Total</span>
+                <span class="preview-amount" id="previewTotal">₹0.00</span>
+            </li>
+
+        </ul>
+
+        <p id="previewNote" class="sell-help" style="margin-top:14px">
+            Select a product and enter the applicable GST rate to calculate the bill.
+        </p>
+
+    </aside>
+
+</div>
+
+
+<!-- GENERATED INVOICE -->
+
+{% if invoice %}
+
+    <div class="sell-panel invoice-panel">
+
+        <h2>Generated Invoice</h2>
+
+        <pre class="invoice-output">{{ invoice }}</pre>
+
+        <div class="sell-actions no-print">
+            <button type="button" onclick="window.print()">
+                Print Invoice
+            </button>
+        </div>
+
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+
+{% block scripts %}
+
+<script>
+(function () {
+
+    const productSelect = document.getElementById("product_id");
+    const quantityInput = document.getElementById("quantity");
+    const discountInput = document.getElementById("discount_percent");
+    const gstInput = document.getElementById("gst_rate");
+    const supplyInput = document.getElementById("supply_type");
+    const phoneInput = document.getElementById("customer_phone");
+    const sellForm = document.getElementById("sellForm");
+
+
+    function money(value) {
+
+        return new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value || 0);
+
+    }
+
+
+    function setText(id, value) {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent = value;
+        }
+
+    }
+
+
+    function updatePreview() {
+
+        const option =
+            productSelect.options[productSelect.selectedIndex];
+
+        const price = Number(
+            option && option.dataset.price
+                ? option.dataset.price
+                : 0
+        );
+
+        const stock = Number(
+            option && option.dataset.stock
+                ? option.dataset.stock
+                : 0
+        );
+
+        const quantity = Math.max(
+            0,
+            Number(quantityInput.value || 0)
+        );
+
+        const discountPercent = Math.min(
+            100,
+            Math.max(0, Number(discountInput.value || 0))
+        );
+
+        const rate = Math.min(
+            40,
+            Math.max(0, Number(gstInput.value || 0))
+        );
+
+        const supplyType = supplyInput.value;
+
+
+        // Subtotal
+
+        const subtotal = Math.round(
+            (price * quantity + Number.EPSILON) * 100
+        ) / 100;
+
+
+        // Discount
+
+        const discount = Math.round(
+            (subtotal * discountPercent / 100 + Number.EPSILON) * 100
+        ) / 100;
+
+
+        // Taxable amount after discount
+
+        const taxable = Math.round(
+            (subtotal - discount + Number.EPSILON) * 100
+        ) / 100;
+
+
+        // GST
+
+        const gst = Math.round(
+            (taxable * rate / 100 + Number.EPSILON) * 100
+        ) / 100;
+
+
+        let cgst = 0;
+        let sgst = 0;
+        let igst = 0;
+
+
+        if (supplyType === "intra") {
+
+            cgst = Math.round(
+                (gst / 2 + Number.EPSILON) * 100
+            ) / 100;
+
+            sgst = Math.round(
+                (gst - cgst + Number.EPSILON) * 100
+            ) / 100;
+
+            setText(
+                "cgstLabel",
+                "CGST (" + (rate / 2).toFixed(2) + "%)"
+            );
+
+            setText(
+                "sgstLabel",
+                "SGST (" + (rate / 2).toFixed(2) + "%)"
+            );
+
+            setText(
+                "igstLabel",
+                "IGST (not applicable)"
+            );
+
+        } else {
+
+            igst = gst;
+
+            setText(
+                "cgstLabel",
+                "CGST (not applicable)"
+            );
+
+            setText(
+                "sgstLabel",
+                "SGST (not applicable)"
+            );
+
+            setText(
+                "igstLabel",
+                "IGST (" + rate.toFixed(2) + "%)"
+            );
+
+        }
+
+
+        // Update amounts
+
+        setText("unitPrice", money(price));
+        setText("previewQuantity", String(quantity));
+        setText("previewSubtotal", money(subtotal));
+        setText("previewDiscount", money(discount));
+        setText("previewTaxable", money(taxable));
+        setText("previewCgst", money(cgst));
+        setText("previewSgst", money(sgst));
+        setText("previewIgst", money(igst));
+        setText("previewGst", money(gst));
+        setText("previewTotal", money(taxable + gst));
+
+
+        // Show stock and expiry information
+
+        const productInfo = document.getElementById("productInfo");
+
+        if (option && option.value) {
+
+            productInfo.textContent =
+                "Available stock: " + stock +
+                " units. Expiry date: " +
+                (option.dataset.expiry || "Not recorded") + ".";
+
+        } else {
+
+            productInfo.textContent =
+                "Select a product to see its available stock and price.";
+
+        }
+
+
+        // Preview warning
+
+        const previewNote = document.getElementById("previewNote");
+
+        if (option && option.value && quantity > stock) {
+
+            previewNote.textContent =
+                "Warning: requested quantity is greater than available stock.";
+
+        } else if (gstInput.value.trim() === "") {
+
+            previewNote.textContent =
+                "Enter the correct GST rate. The final amount includes GST.";
+
+        } else {
+
+            previewNote.textContent =
+                "Preview only. The server validates stock and calculates the final invoice.";
+
+        }
+
+    }
+
+
+    // Live preview events
+
+    [
+        productSelect,
+        quantityInput,
+        discountInput,
+        gstInput,
+        supplyInput
+    ].forEach(function (element) {
+
+        element.addEventListener("input", updatePreview);
+        element.addEventListener("change", updatePreview);
+
+    });
+
+
+    // Restrict customer phone to 10 digits
+
+    if (phoneInput) {
+
+        phoneInput.addEventListener("input", function () {
+
+            this.value = this.value
+                .replace(/\D/g, "")
+                .slice(0, 10);
+
+        });
+
+    }
+
+
+    // Require GST rate to be explicitly entered
+
+    sellForm.addEventListener("submit", function (event) {
+
+        if (gstInput.value.trim() === "") {
+
+            event.preventDefault();
+
+            gstInput.setCustomValidity(
+                "Enter the applicable GST rate, or 0 if no GST applies."
+            );
+
+            gstInput.reportValidity();
+
+        } else {
+
+            gstInput.setCustomValidity("");
+
+        }
+
+    });
+
+
+    gstInput.addEventListener("input", function () {
+        this.setCustomValidity("");
+    });
+
+
+    updatePreview();
+
+})();
+</script>
+
+{% endblock %}

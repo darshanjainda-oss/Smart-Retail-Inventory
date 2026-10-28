@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Retail Inventory{% endblock %}</title>
+    <style>
+        :root{--sidebar-bg:#142033;--sidebar-muted:#a9b6c9;--sidebar-active:#263b5b;--primary:#2563eb;--primary-dark:#1d4ed8;--page-bg:#f3f6fb;--text:#172033;--muted:#667085;--border:#e5eaf2;--shadow:0 8px 24px rgba(21,34,56,.06)}
+        *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--text);background:var(--page-bg);line-height:1.5}a{color:inherit}.app-shell{min-height:100vh}
+        .sidebar{width:258px;background:var(--sidebar-bg);color:#fff;position:fixed;inset:0 auto 0 0;display:flex;flex-direction:column;padding:22px 14px 16px;overflow-y:auto;z-index:1000;transition:transform .25s ease}
+        .brand{display:flex;align-items:center;gap:11px;padding:4px 11px 25px;border-bottom:1px solid rgba(255,255,255,.10);margin-bottom:20px}.brand-mark{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#3478f6;color:#fff;font-size:21px;font-weight:800}.brand-name{font-size:15px;font-weight:750}.brand-caption{color:var(--sidebar-muted);font-size:11px;margin-top:2px}
+        .nav-caption{padding:0 12px 8px;color:#7f91ad;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.25px}.nav-list{display:flex;flex-direction:column;gap:5px}.nav-link{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;color:var(--sidebar-muted);text-decoration:none;font-size:13px;font-weight:600;transition:background .15s ease,color .15s ease}.nav-link:hover{color:#fff;background:rgba(255,255,255,.07)}.nav-link.active{color:#fff;background:var(--sidebar-active);box-shadow:inset 3px 0 #60a5fa}.nav-icon{width:20px;text-align:center;font-size:16px;flex-shrink:0}
+        .sidebar-bottom{margin-top:auto;padding:18px 11px 0;border-top:1px solid rgba(255,255,255,.10);color:var(--sidebar-muted);font-size:11px}.sidebar-bottom strong{color:#fff;display:block;margin-bottom:3px;font-size:12px}.main-area{margin-left:258px;min-height:100vh}.topbar{min-height:72px;background:rgba(255,255,255,.95);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:15px;padding:13px 30px;position:sticky;top:0;z-index:100}.topbar-left{display:flex;align-items:center;gap:14px}.topbar h1{font-size:18px;margin:0;font-weight:750}.topbar-subtitle{color:var(--muted);font-size:12px;margin-top:2px}.topbar-right{display:flex;align-items:center;gap:10px}
+        .user-chip{display:flex;align-items:center;gap:9px;padding:7px 11px;border:1px solid var(--border);border-radius:30px;background:#fff;font-size:12px;font-weight:700}.user-avatar{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#e6efff;color:#1d4ed8;font-weight:800}.logout-link{text-decoration:none;border:1px solid var(--border);background:#fff;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:700;color:#4b5565}.logout-link:hover{background:#f8fafc}.menu-toggle{display:none;border:1px solid var(--border);background:#fff;border-radius:9px;padding:8px 11px;cursor:pointer}
+        .page-content{padding:28px 30px 36px;max-width:1700px;margin:0 auto}.page-footer{color:#8590a2;font-size:11px;padding:0 30px 22px}.flash-area{margin-bottom:18px}.flash-message{padding:12px 15px;border-radius:10px;margin-bottom:8px;border:1px solid var(--border);background:#fff;font-size:13px}.flash-message.success{background:#e8f7ee;color:#13733b;border-color:#c9edd6}.flash-message.warning{background:#fff4df;color:#875900;border-color:#ffe6ae}.flash-message.error,.flash-message.danger{background:#fdecec;color:#a82424;border-color:#f9cccc}
+        .page-content h2{margin-top:0}.card,.panel,.table-container,.content-card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow)}.card,.panel,.content-card{padding:20px}.table-container{padding:18px;overflow-x:auto}table{border-collapse:collapse;width:100%;background:#fff}th,td{padding:12px 13px;border-bottom:1px solid var(--border);text-align:left;font-size:13px}th{color:#526078;background:#f8faff;font-size:11px;text-transform:uppercase;letter-spacing:.45px}tr:last-child td{border-bottom:0}input,select,textarea{max-width:100%;border:1px solid #d8dfeb;border-radius:9px;padding:10px 12px;font:inherit;background:#fff}input:focus,select:focus,textarea:focus{outline:2px solid rgba(37,99,235,.16);border-color:#7aa7ff}button,.btn{border:0;border-radius:9px;padding:10px 15px;background:var(--primary);color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}button:hover,.btn:hover{background:var(--primary-dark)}.btn-secondary{background:#edf2f8;color:#26364e}.btn-secondary:hover{background:#dfe7f2}.muted,.text-muted{color:var(--muted)}.badge,.status-badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#edf2ff;color:#234bb0;font-size:11px;font-weight:700}.empty-state{padding:26px;text-align:center;color:var(--muted)}
+        body.login-layout{background:#f3f6fb}body.login-layout .main-area{margin-left:0}body.login-layout .page-content{max-width:none;min-height:100vh;padding:0}body.login-layout .menu-toggle{display:none}
+        @media(max-width:1000px){.sidebar{transform:translateX(-100%)}body.sidebar-open .sidebar{transform:translateX(0);box-shadow:8px 0 35px rgba(0,0,0,.2)}.main-area{margin-left:0}.menu-toggle{display:inline-block}.topbar{padding:12px 18px}.page-content{padding:22px 18px 30px}.page-footer{padding:0 18px 20px}}
+        @media(max-width:560px){.topbar h1{font-size:16px}.topbar-subtitle{display:none}.user-chip{display:none}.page-content{padding:16px 12px 24px}.topbar{min-height:64px;padding:10px 12px}}
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% if request.endpoint == 'login' %}login-layout{% endif %}">
+<div class="app-shell">
+    {% if request.endpoint != 'login' %}
+    <aside class="sidebar" id="sidebar">
+        <div class="brand"><div class="brand-mark">SR</div><div><div class="brand-name">Smart Retail</div><div class="brand-caption">Inventory Intelligence</div></div></div>
+        <div class="nav-caption">Workspace</div>
+        <nav class="nav-list" aria-label="Main navigation">
+            <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><span class="nav-icon">▦</span><span>Dashboard</span></a>
+            <a href="{{ url_for('products') }}" class="nav-link {% if request.endpoint == 'products' %}active{% endif %}"><span class="nav-icon">▤</span><span>Products</span></a>
+            <a href="{{ url_for('add_product_page') }}" class="nav-link {% if request.endpoint == 'add_product_page' %}active{% endif %}"><span class="nav-icon">＋</span><span>Add Product</span></a>
+            <a href="{{ url_for('sell_page') }}" class="nav-link {% if request.endpoint == 'sell_page' %}active{% endif %}"><span class="nav-icon">▣</span><span>Sell Product</span></a>
+            <a href="{{ url_for('sales') }}" class="nav-link {% if request.endpoint == 'sales' %}active{% endif %}"><span class="nav-icon">↗</span><span>Sales History</span></a>
+            <a href="{{ url_for('customers') }}" class="nav-link {% if request.endpoint == 'customers' %}active{% endif %}"><span class="nav-icon">♙</span><span>Customers</span></a>
+            <a href="{{ url_for('invoices') }}" class="nav-link {% if request.endpoint in ['invoices', 'invoice_view'] %}active{% endif %}"><span class="nav-icon">▧</span><span>Invoices</span></a>
+        </nav>
+        <div class="nav-caption" style="margin-top:24px">Smart Tools</div>
+        <nav class="nav-list" aria-label="Smart tools navigation">
+            <a href="{{ url_for('forecast_page') }}" class="nav-link {% if request.endpoint == 'forecast_page' %}active{% endif %}"><span class="nav-icon">⌁</span><span>Demand Forecast</span></a>
+            <a href="{{ url_for('simulator') }}" class="nav-link {% if request.endpoint == 'simulator' %}active{% endif %}"><span class="nav-icon">⚙</span><span>Decision Simulator</span></a>
+            <a href="{{ url_for('expiry_decisions') }}" class="nav-link {% if request.endpoint == 'expiry_decisions' %}active{% endif %}"><span class="nav-icon">◷</span><span>Expiry-Aware Decisions</span></a>
+        </nav>
+        <div class="sidebar-bottom"><strong>Smart Retail Inventory</strong><span>Retail decision-support prototype</span></div>
+    </aside>
+    {% endif %}
+
+    <div class="main-area">
+        {% if request.endpoint != 'login' %}
+        <header class="topbar">
+            <div class="topbar-left"><button class="menu-toggle" type="button" onclick="document.body.classList.toggle('sidebar-open')" aria-label="Toggle navigation">☰</button><div><h1>{% block page_heading %}Smart Retail Inventory{% endblock %}</h1><div class="topbar-subtitle">Manage stock, sales and smart inventory decisions</div></div></div>
+            <div class="topbar-right"><div class="user-chip"><span class="user-avatar">{{ (session.get('username', 'A')|string)[:1]|upper }}</span><span>{{ session.get('username', 'Admin') }}</span></div><a href="{{ url_for('logout') }}" class="logout-link">Log out</a></div>
+        </header>
+        {% endif %}
+        <main class="page-content">
+            {% if request.endpoint != 'login' %}
+                {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-area">{% for category, message in messages %}<div class="flash-message {{ category|e }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+        {% if request.endpoint != 'login' %}<footer class="page-footer">Smart Retail Inventory · Academic project</footer>{% endif %}
+    </div>
+</div>
+{% block scripts %}{% endblock %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    function setupPhoneValidation() {
+
+        const inputs = document.querySelectorAll("input");
+
+        inputs.forEach(function (input) {
+
+            const fieldInfo = (
+                (input.name || "") + " " +
+                (input.id || "") + " " +
+                (input.placeholder || "")
+            ).toLowerCase();
+
+            const isPhoneField =
+                /phone|mobile|contact/.test(fieldInfo);
+
+            if (!isPhoneField) {
+                return;
+            }
+
+            // Numeric input ko telephone input mein badlo
+            if (input.type === "number") {
+                input.type = "tel";
+            }
+
+            // Maximum 10 digits
+            input.maxLength = 10;
+            input.inputMode = "numeric";
+            input.pattern = "[0-9]{10}";
+            input.title = "Enter exactly 10 digits.";
+
+            // Purane invalid input ko bhi clean karo
+            input.value = input.value
+                .replace(/[^0-9]/g, "")
+                .slice(0, 10);
+
+            // Typing aur paste dono par validation
+            input.addEventListener("input", function () {
+
+                this.value = this.value
+                    .replace(/[^0-9]/g, "")
+                    .slice(0, 10);
+
+            });
+
+        });
+    }
+
+    setupPhoneValidation();
+
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const namePattern =
+        /^[\p{L}]+(?:[ .'-][\p{L}]+)*\.?$/u;
+
+    const inputs = document.querySelectorAll(
+        'input[name="customer_name"], ' +
+        'input[name="customername"], ' +
+        'input[name="customer_full_name"]'
+    );
+
+    inputs.forEach(function (input) {
+
+        input.maxLength = 80;
+        input.autocomplete = "name";
+        input.title =
+            "Enter a valid name, for example Darshan Jain.";
+
+        const form = input.closest("form");
+
+        if (!form) {
+            return;
+        }
+
+        form.addEventListener("submit", function (event) {
+
+            const name = input.value.trim().replace(/\s+/g, " ");
+
+            const letterCount = (
+                name.match(/\p{L}/gu) || []
+            ).length;
+
+            if (
+                !namePattern.test(name) ||
+                letterCount < 2 ||
+                name.length > 80
+            ) {
+                event.preventDefault();
+
+                input.setCustomValidity(
+                    "Enter a valid name, such as Darshan Jain. " +
+                    "Numbers, @ and underscores are not allowed."
+                );
+
+                input.reportValidity();
+            } else {
+                input.setCustomValidity("");
+            }
+        });
+
+        input.addEventListener("input", function () {
+            input.setCustomValidity("");
+        });
+
+    });
+
+});
+</script>
+</body>
+</html>

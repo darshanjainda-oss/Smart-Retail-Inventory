@@ -1,0 +1,45 @@
+
+========================================
+        SMART RETAIL STORE
+           SALES INVOICE
+========================================
+
+Invoice No : INV0005
+Date       : 26-10-2026 15:39
+
+Customer Name  : Dev
+Customer Phone : 8871455752
+
+----------------------------------------
+PRODUCT DETAILS
+----------------------------------------
+
+Product ID : 2
+Product    : sugar
+Category   : grocery
+Expiry Date: N/A
+
+Quantity   : 100
+Unit Price : ₹55.00
+
+----------------------------------------
+BILL BREAKDOWN
+----------------------------------------
+
+Subtotal                  : ₹5500.00
+Discount (0.00%)  : ₹0.00
+Taxable Amount             : ₹5500.00
+GST Rate                   : 0.00%
+Supply Type                : Intra-state (CGST + SGST)
+CGST (0.00%)            : ₹0.00
+SGST (0.00%)            : ₹0.00
+Total GST                  : ₹0.00
+----------------------------------------
+FINAL AMOUNT               : ₹5500.00
+----------------------------------------
+
+Remaining Stock            : 700
+
+========================================
+       THANK YOU! VISIT AGAIN
+========================================

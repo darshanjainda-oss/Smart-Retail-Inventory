@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Expiry-Aware Decisions | Smart Retail Inventory{% endblock %}
+
+{% block content %}
+<style>
+  .ead-wrap { max-width: 1500px; margin: 0 auto; }
+  .ead-header { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:18px; }
+  .ead-header h1 { margin:0 0 7px; }
+  .ead-subtitle { margin:0; color:var(--muted, #64748b); line-height:1.5; }
+  .ead-note { border:1px solid #bfdbfe; background:#eff6ff; color:#1e3a8a; padding:12px 14px; border-radius:12px; margin:14px 0 20px; line-height:1.5; }
+  .ead-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin:18px 0; }
+  .ead-card { border:1px solid var(--border, #e2e8f0); border-radius:14px; padding:16px; background:var(--card, #fff); }
+  .ead-card .label { color:var(--muted, #64748b); font-size:.88rem; }
+  .ead-card .value { font-size:1.65rem; font-weight:750; margin-top:6px; }
+  .ead-table-wrap { overflow:auto; border:1px solid var(--border, #e2e8f0); border-radius:14px; background:var(--card, #fff); }
+  .ead-table { width:100%; border-collapse:collapse; min-width:1120px; }
+  .ead-table th, .ead-table td { padding:12px 13px; border-bottom:1px solid var(--border, #e2e8f0); text-align:left; vertical-align:top; font-size:.91rem; }
+  .ead-table th { background:var(--table-head, #f8fafc); white-space:nowrap; }
+  .ead-table tr:last-child td { border-bottom:0; }
+  .ead-badge { display:inline-block; padding:5px 8px; border-radius:999px; font-size:.76rem; font-weight:700; white-space:nowrap; }
+  .ead-critical { background:#fee2e2; color:#991b1b; }
+  .ead-high { background:#ffedd5; color:#9a3412; }
+  .ead-warning { background:#fef3c7; color:#92400e; }
+  .ead-info { background:#e0f2fe; color:#075985; }
+  .ead-success { background:#dcfce7; color:#166534; }
+  .ead-unknown { background:#e5e7eb; color:#374151; }
+  .ead-action { max-width:390px; min-width:260px; line-height:1.45; }
+  .ead-small { color:var(--muted, #64748b); font-size:.8rem; line-height:1.4; margin-top:5px; }
+  .ead-empty { padding:24px; text-align:center; color:var(--muted, #64748b); }
+  @media (max-width:700px) { .ead-header h1 {font-size:1.4rem;} }
+</style>
+
+<div class="ead-wrap">
+  <div class="ead-header">
+    <div>
+      <h1>Expiry-Aware Smart Reorder Decisions</h1>
+      <p class="ead-subtitle">Combines expiry dates, current stock and recent sales to estimate sell-through and flag when replenishment should be reviewed.</p>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+  </div>
+
+  <div class="ead-note">
+    <strong>Decision support only:</strong> expected sales are estimated as units sold in the last {{ lookback_days }} calendar days divided by {{ lookback_days }}, multiplied by days remaining to expiry. Low-confidence data is clearly flagged. This page does not change stock or create purchase orders. Product-level expiry is not batch-level FEFO tracking.
+  </div>
+
+  {% if error %}
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <div class="ead-cards">
+    <div class="ead-card"><div class="label">Products evaluated</div><div class="value">{{ summary.get('total_products', 0) }}</div></div>
+    <div class="ead-card"><div class="label">Expired stock</div><div class="value">{{ summary.get('expired_with_stock', 0) }}</div></div>
+    <div class="ead-card"><div class="label">Expiring within {{ near_expiry_days }} days</div><div class="value">{{ summary.get('near_expiry', 0) }}</div></div>
+    <div class="ead-card"><div class="label">Missing expiry date</div><div class="value">{{ summary.get('missing_expiry_date', 0) }}</div></div>
+    <div class="ead-card"><div class="label">Low-confidence estimates</div><div class="value">{{ summary.get('low_confidence', 0) }}</div></div>
+    <div class="ead-card"><div class="label">Pause-reorder suggestions</div><div class="value">{{ summary.get('reorder_pause_suggestions', 0) }}</div></div>
+  </div>
+
+  <div class="ead-table-wrap">
+    <table class="ead-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Current stock</th>
+          <th>Expiry</th>
+          <th>Sales in {{ lookback_days }} days</th>
+          <th>Estimated sales before expiry</th>
+          <th>Estimated unsold stock</th>
+          <th>Confidence</th>
+          <th>Risk</th>
+          <th>Recommended decision</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in decisions %}
+          <tr>
+            <td>
+              <strong>{{ item.name }}</strong>
+              <div class="ead-small">ID: {{ item.product_id }} · {{ item.category }}</div>
+              <div class="ead-small">Supplier: {{ item.supplier }}</div>
+            </td>
+            <td>{{ item.stock }}</td>
+            <td>
+              {% if item.expiry_date %}
+                {{ item.expiry_date.strftime('%d %b %Y') if item.expiry_date.strftime is defined else item.expiry_date }}
+                {% if item.days_to_expiry is not none %}<div class="ead-small">{% if item.days_to_expiry < 0 %}{{ -item.days_to_expiry }} days past expiry{% elif item.days_to_expiry == 0 %}Expires today{% else %}{{ item.days_to_expiry }} days left{% endif %}</div>{% endif %}
+              {% else %}
+                <span class="ead-badge ead-unknown">Not recorded</span>
+              {% endif %}
+            </td>
+            <td>{{ item.units_sold }} units <div class="ead-small">{{ item.sale_days }} distinct sale days</div></td>
+            <td>{% if item.expected_sales_before_expiry is not none %}{{ item.expected_sales_before_expiry }} units{% else %}—{% endif %}</td>
+            <td>{% if item.expected_unsold is not none %}{{ item.expected_unsold }} units <div class="ead-small">{{ item.unsold_percent }}% of current stock</div>{% else %}—{% endif %}</td>
+            <td>
+              {% if item.confidence == 'High' %}<span class="ead-badge ead-success">High</span>
+              {% elif item.confidence == 'Medium' %}<span class="ead-badge ead-info">Medium</span>
+              {% else %}<span class="ead-badge ead-unknown">Low</span>{% endif %}
+              <div class="ead-small">{{ item.confidence_note }}</div>
+            </td>
+            <td>
+              {% if item.risk_key == 'critical' %}<span class="ead-badge ead-critical">{{ item.risk_level }}</span>
+              {% elif item.risk_key == 'high' %}<span class="ead-badge ead-high">{{ item.risk_level }}</span>
+              {% elif item.risk_key == 'warning' %}<span class="ead-badge ead-warning">{{ item.risk_level }}</span>
+              {% elif item.risk_key == 'success' %}<span class="ead-badge ead-success">{{ item.risk_level }}</span>
+              {% elif item.risk_key == 'unknown' %}<span class="ead-badge ead-unknown">{{ item.risk_level }}</span>
+              {% else %}<span class="ead-badge ead-info">{{ item.risk_level }}</span>{% endif %}
+            </td>
+            <td class="ead-action">
+              <strong>{{ item.decision_label }}</strong>
+              <div class="ead-small">{{ item.action }}</div>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9" class="ead-empty">No products found. Add products to generate expiry-aware recommendations.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}
+Sales History | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Sales History
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Sales History
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:13px;
+        margin-bottom:25px;
+    ">
+        Complete record of customer transactions.
+    </p>
+
+
+    {% if sales %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>Invoice</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Discount</th>
+                    <th>Total</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for sale in sales %}
+
+                <tr>
+
+                    <td style="font-weight:600;">
+                        {{ sale.invoice_number }}
+                    </td>
+
+                    <td>
+                        {{ sale.date }}
+                    </td>
+
+                    <td>
+                        {{ sale.customer_name }}
+                    </td>
+
+                    <td>
+                        {{ sale.customer_phone }}
+                    </td>
+
+                    <td>
+                        {{ sale.product }}
+                    </td>
+
+                    <td>
+                        {{ sale.quantity }}
+                    </td>
+
+                    <td>
+                        ₹{{ sale.price }}
+                    </td>
+
+                    <td>
+                        {{ sale.discount_percent }}%
+                    </td>
+
+                    <td style="font-weight:600;">
+                        ₹{{ sale.total }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty">
+            No sales found.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

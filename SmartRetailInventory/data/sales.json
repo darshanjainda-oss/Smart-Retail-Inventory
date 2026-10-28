@@ -1,0 +1,22 @@
+[
+    {
+        "date": "14-08-2026 22:39",
+        "product": "rice",
+        "quantity": 5,
+        "price": 40.0,
+        "total": 200.0
+    },
+    {
+        "invoice_number": "INV0002",
+        "date": "14-08-2026 22:45",
+        "customer_name": "Dev",
+        "customer_phone": "8876543xxx",
+        "product": "rice",
+        "quantity": 5,
+        "price": 40.0,
+        "subtotal": 200.0,
+        "discount_percent": 10.0,
+        "discount_amount": 20.0,
+        "total": 180.0
+    }
+]

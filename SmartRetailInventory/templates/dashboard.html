@@ -1,0 +1,1771 @@
+{% extends "base.html" %}
+
+{% block title %}
+Dashboard | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+
+{% block extra_head %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .kpi-card {
+        background: white;
+        padding: 22px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    .kpi-label {
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .kpi-value {
+        color: #0f172a;
+        font-size: 27px;
+        font-weight: 700;
+    }
+
+    .kpi-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f1f5f9;
+        font-size: 21px;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .three-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .panel {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 22px;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    }
+
+    .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+        margin: 0;
+        font-size: 16px;
+        color: #0f172a;
+    }
+
+    .panel-link {
+        color: #475569;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 280px;
+    }
+
+    .product-name {
+        color: #0f172a;
+        font-weight: 600;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .low {
+        background: #fff7ed;
+        color: #9a3412;
+    }
+
+    .restock {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .sufficient {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .insight-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .insight {
+        padding: 15px;
+        border-radius: 9px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .insight-title {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .insight-text {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .simulator-banner {
+        background: linear-gradient(
+            135deg,
+            #0f172a,
+            #334155
+        );
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .simulator-banner h2 {
+        color: white;
+        margin-bottom: 7px;
+        font-size: 18px;
+    }
+
+    .simulator-banner p {
+        color: #cbd5e1;
+        font-size: 12px;
+        line-height: 1.6;
+        max-width: 700px;
+    }
+
+    .simulator-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        padding: 11px 17px;
+        background: white;
+        color: #0f172a;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .empty {
+        text-align: center;
+        padding: 35px 20px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    @media (max-width: 1200px) {
+
+        .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .three-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+    @media (max-width: 850px) {
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .simulator-banner {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+    }
+
+    @media (max-width: 600px) {
+
+        .kpi-grid {
+            grid-template-columns: 1fr;
+        }
+
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<!-- =====================================================
+     SMART SIMULATOR BANNER
+====================================================== -->
+
+<div class="simulator-banner">
+
+    <div>
+
+        <h2>
+            🧪 Retail Decision Simulator
+        </h2>
+
+        <p>
+            Test hypothetical demand increases and
+            supplier delays before changing your real
+            inventory. The simulation does not modify
+            your actual MySQL stock.
+        </p>
+
+    </div>
+
+
+    <a
+        href="/simulator"
+        class="simulator-button"
+    >
+        Run Scenario
+    </a>
+
+</div>
+
+
+<!-- =====================================================
+     KPI CARDS
+====================================================== -->
+
+<div class="kpi-grid">
+
+
+    <div class="kpi-card">
+
+        <div>
+
+            <div class="kpi-label">
+                Total Products
+            </div>
+
+            <div class="kpi-value">
+                {{ inventory.total_products }}
+            </div>
+
+        </div>
+
+        <div class="kpi-icon">
+            📦
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div>
+
+            <div class="kpi-label">
+                Total Stock
+            </div>
+
+            <div class="kpi-value">
+                {{ inventory.total_stock }}
+            </div>
+
+        </div>
+
+        <div class="kpi-icon">
+            🏷️
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div>
+
+            <div class="kpi-label">
+                Inventory Value
+            </div>
+
+            <div class="kpi-value">
+                ₹{{ inventory.total_inventory_value }}
+            </div>
+
+        </div>
+
+        <div class="kpi-icon">
+            💰
+        </div>
+
+    </div>
+
+
+    <div class="kpi-card">
+
+        <div>
+
+            <div class="kpi-label">
+                Total Revenue
+            </div>
+
+            <div class="kpi-value">
+                ₹{{ sales_summary.total_revenue }}
+            </div>
+
+        </div>
+
+        <div class="kpi-icon">
+            📈
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     CHARTS
+====================================================== -->
+
+<div class="dashboard-grid">
+
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Top Selling Products
+            </h2>
+
+            <a
+                href="/sales"
+                class="panel-link"
+            >
+                View Sales
+            </a>
+
+        </div>
+
+
+        <div class="chart-container">
+
+            <canvas
+                id="topProductsChart"
+            ></canvas>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Sales Revenue Trend
+            </h2>
+
+            <a
+                href="/sales"
+                class="panel-link"
+            >
+                Sales History
+            </a>
+
+        </div>
+
+
+        <div class="chart-container">
+
+            <canvas
+                id="salesRevenueChart"
+            ></canvas>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     CATEGORY + SALES + LOW STOCK
+====================================================== -->
+
+<div class="three-grid">
+
+
+    <!-- CATEGORY STOCK -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Category-wise Stock
+            </h2>
+
+        </div>
+
+
+        <div class="chart-container">
+
+            <canvas
+                id="categoryStockChart"
+            ></canvas>
+
+        </div>
+
+    </div>
+
+
+    <!-- SALES SUMMARY -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Sales Summary
+            </h2>
+
+        </div>
+
+
+        <table>
+
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+
+            <tr>
+                <td>Transactions</td>
+
+                <td>
+                    {{ sales_summary.total_sales }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Items Sold</td>
+
+                <td>
+                    {{ sales_summary.total_items }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Total Revenue</td>
+
+                <td>
+                    ₹{{ sales_summary.total_revenue }}
+                </td>
+            </tr>
+
+            <tr>
+                <td>Average Sale</td>
+
+                <td>
+                    ₹{{ sales_summary.average_sale }}
+                </td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- LOW STOCK -->
+
+    <div class="panel">
+
+        <div class="panel-header">
+
+            <h2>
+                Low Stock Alert
+            </h2>
+
+            <a
+                href="/products"
+                class="panel-link"
+            >
+                View All
+            </a>
+
+        </div>
+
+
+        {% set low_products =
+            products
+            |selectattr("stock", "lt", 10)
+            |list
+        %}
+
+
+        {% if low_products %}
+
+            {% for product in low_products %}
+
+            <div
+                style="
+                    padding:11px 0;
+                    border-bottom:
+                        1px solid #eef2f7;
+                "
+            >
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:
+                            space-between;
+                        gap:10px;
+                    "
+                >
+
+                    <span class="product-name">
+                        {{ product.name }}
+                    </span>
+
+                    <span class="status low">
+                        {{ product.stock }} left
+                    </span>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                No low-stock products.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+<!-- =====================================================
+     SMART INSIGHTS
+====================================================== -->
+
+<div class="panel"
+     style="margin-bottom:25px;">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>
+                Smart Retail Insights
+            </h2>
+
+            <p style="
+                margin-top:5px;
+                color:#64748b;
+                font-size:12px;
+            ">
+                Automatic explanations from your current
+                inventory and sales data.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="insight-list"
+        id="insightList"
+    >
+
+        <div class="insight">
+
+            <div class="insight-title">
+                Analyzing your retail data...
+            </div>
+
+            <div class="insight-text">
+                Generating explainable inventory insights.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     PRODUCT INVENTORY
+====================================================== -->
+
+<div class="panel"
+     style="margin-bottom:25px;">
+
+    <div class="panel-header">
+
+        <h2>
+            Product Inventory
+        </h2>
+
+        <a
+            href="/products"
+            class="panel-link"
+        >
+            View All Products
+        </a>
+
+    </div>
+
+
+    {% if products %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for product in products %}
+
+                <tr>
+
+                    <td>
+                        {{ product.product_id }}
+                    </td>
+
+                    <td class="product-name">
+                        {{ product.name }}
+                    </td>
+
+                    <td>
+                        {{ product.category }}
+                    </td>
+
+                    <td>
+                        {{ product.supplier }}
+                    </td>
+
+                    <td>
+                        ₹{{ product.price }}
+                    </td>
+
+                    <td>
+
+                        {% if product.stock < 10 %}
+
+                            <span class="status low">
+                                {{ product.stock }}
+                            </span>
+
+                        {% else %}
+
+                            {{ product.stock }}
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty">
+            No products available.
+        </div>
+
+    {% endif %}
+
+</div>
+
+<!-- =====================================================
+     EXPIRY RISK MONITOR
+====================================================== -->
+
+<div class="panel"
+     style="margin-bottom:25px;">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>
+                Shelf-Life Risk Monitor
+            </h2>
+
+            <p style="
+                margin-top:5px;
+                color:#64748b;
+                font-size:12px;
+            ">
+                Products approaching or past their expiry date.
+            </p>
+
+        </div>
+
+        <a
+            href="/products"
+            class="panel-link"
+        >
+            View Inventory
+        </a>
+
+    </div>
+
+
+    {% if expiry_alerts %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Product
+                    </th>
+
+                    <th>
+                        Category
+                    </th>
+
+                    <th>
+                        Stock
+                    </th>
+
+                    <th>
+                        Expiry Date
+                    </th>
+
+                    <th>
+                        Days Remaining
+                    </th>
+
+                    <th>
+                        Risk
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in expiry_alerts %}
+
+                <tr>
+
+                    <td style="font-weight:600;">
+                        {{ item.name }}
+                    </td>
+
+                    <td>
+                        {{ item.category }}
+                    </td>
+
+                    <td>
+                        {{ item.stock }}
+                    </td>
+
+                    <td>
+                        {{ item.expiry_date }}
+                    </td>
+
+                    <td>
+
+                        {% if item.days_to_expiry < 0 %}
+
+                            Expired
+
+                        {% else %}
+
+                            {{ item.days_to_expiry }}
+                            days
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if item.days_to_expiry < 0 %}
+
+                            <span class="status danger">
+                                EXPIRED
+                            </span>
+
+                        {% elif item.days_to_expiry <= 7 %}
+
+                            <span class="status danger">
+                                CRITICAL
+                            </span>
+
+                        {% else %}
+
+                            <span class="status low">
+                                EXPIRING SOON
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="empty">
+
+        No products are within the
+        30-day expiry warning window.
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+<!-- =====================================================
+     DEMAND FORECAST
+====================================================== -->
+
+<div class="panel">
+
+    <div class="panel-header">
+
+        <div>
+
+            <h2>
+                Demand Forecast & Stock Recommendation
+            </h2>
+
+            <p style="
+                margin-top:5px;
+                color:#64748b;
+                font-size:12px;
+            ">
+                Forecast-driven inventory recommendations.
+            </p>
+
+        </div>
+
+
+        <a
+            href="/forecast"
+            class="panel-link"
+        >
+            Open Forecast
+        </a>
+
+    </div>
+
+
+    {% if forecast_data %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Product
+                    </th>
+
+                    <th>
+                        Current Stock
+                    </th>
+
+                    <th>
+                        7-Day Demand
+                    </th>
+
+                    <th>
+                        Recommended Stock
+                    </th>
+
+                    <th>
+                        Additional Stock
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for item in forecast_data %}
+
+                <tr>
+
+                    <td class="product-name">
+                        {{ item.name }}
+                    </td>
+
+
+                    <td>
+                        {{ item.current_stock }}
+                    </td>
+
+
+                    <td>
+
+                        {% if item.predicted_demand
+                              is not none %}
+
+                            {{ item.predicted_demand }}
+                            units
+
+                        {% else %}
+
+                            Not enough data
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if item.recommended_stock
+                              is not none %}
+
+                            {{ item.recommended_stock }}
+                            units
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if item.additional_stock
+                              is not none %}
+
+                            {{ item.additional_stock }}
+                            units
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if item.status
+                              == "RESTOCK REQUIRED" %}
+
+                            <span class="status restock">
+                                Restock Required
+                            </span>
+
+                        {% elif item.status
+                              == "STOCK SUFFICIENT" %}
+
+                            <span class="status sufficient">
+                                Stock Sufficient
+                            </span>
+
+                        {% else %}
+
+                            <span class="status">
+                                {{ item.status }}
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty">
+            No forecast data available.
+        </div>
+
+    {% endif %}
+
+</div>
+
+
+{% endblock %}
+
+
+{% block extra_scripts %}
+
+<script>
+
+
+    /* =====================================================
+       CHART DATA
+    ===================================================== */
+
+
+    const topProductLabels = [
+
+        {% for item in top_products %}
+
+            {{ item.product|tojson }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const topProductValues = [
+
+        {% for item in top_products %}
+
+            {{ item.quantity_sold|float }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const salesDates = [
+
+        {% for item in sales_chart %}
+
+            {{ item.sale_day|string|tojson }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const salesRevenue = [
+
+        {% for item in sales_chart %}
+
+            {{ item.revenue|float }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const categoryLabels = [
+
+        {% for item in category_stock %}
+
+            {{ (
+                item.category or "Unknown"
+            )|tojson }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const categoryValues = [
+
+        {% for item in category_stock %}
+
+            {{ item.total_stock|float }}
+
+            {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    /* =====================================================
+       TOP PRODUCTS CHART
+    ===================================================== */
+
+    new Chart(
+
+        document.getElementById(
+            "topProductsChart"
+        ),
+
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels:
+                    topProductLabels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Units Sold",
+
+                        data:
+                            topProductValues
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+    /* =====================================================
+       REVENUE CHART
+    ===================================================== */
+
+    new Chart(
+
+        document.getElementById(
+            "salesRevenueChart"
+        ),
+
+        {
+
+            type: "line",
+
+            data: {
+
+                labels:
+                    salesDates,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Revenue (₹)",
+
+                        data:
+                            salesRevenue,
+
+                        fill: false,
+
+                        tension: 0.3
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    );
+
+
+    /* =====================================================
+       CATEGORY STOCK CHART
+    ===================================================== */
+
+    new Chart(
+
+        document.getElementById(
+            "categoryStockChart"
+        ),
+
+        {
+
+            type: "doughnut",
+
+            data: {
+
+                labels:
+                    categoryLabels,
+
+                datasets: [
+
+                    {
+
+                        label:
+                            "Stock",
+
+                        data:
+                            categoryValues
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false
+
+            }
+
+        }
+
+    );
+
+
+    /* =====================================================
+       SMART INSIGHTS ENGINE
+       Explainable rule-based analysis
+    ===================================================== */
+
+
+    const insightList =
+        document.getElementById(
+            "insightList"
+        );
+
+
+    const insights = [];
+
+
+    // ---------------------------------------------
+    // TOP SELLING PRODUCT
+    // ---------------------------------------------
+
+    if (topProductLabels.length > 0) {
+
+        const topProduct =
+            topProductLabels[0];
+
+        const topQuantity =
+            topProductValues[0];
+
+        insights.push({
+
+            title:
+                "Top-selling product",
+
+            text:
+                `${topProduct} is currently the highest-
+                selling recorded product with
+                ${topQuantity} units sold.`
+
+        });
+
+    }
+
+
+    // ---------------------------------------------
+    // LOW STOCK
+    // ---------------------------------------------
+
+    const lowStockProducts = [
+
+        {% for product in products %}
+
+        {
+
+            name:
+                {{ product.name|tojson }},
+
+            stock:
+                {{ product.stock|int }}
+
+        }
+
+        {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ].filter(
+
+        product =>
+            product.stock < 10
+
+    );
+
+
+    if (
+        lowStockProducts.length > 0
+    ) {
+
+        const names =
+            lowStockProducts
+                .map(
+                    product =>
+                        product.name
+                )
+                .join(", ");
+
+
+        insights.push({
+
+            title:
+                "Low-stock attention",
+
+            text:
+                `${names} ${lowStockProducts.length === 1
+                    ? "has"
+                    : "have"} less than
+                    10 units available and
+                    should be monitored.`
+
+        });
+
+    }
+    else {
+
+        insights.push({
+
+            title:
+                "Inventory availability",
+
+            text:
+                "No product is currently below the
+                configured low-stock threshold of
+                10 units."
+
+        });
+
+    }
+
+
+    // ---------------------------------------------
+    // REVENUE TREND
+    // ---------------------------------------------
+
+    if (
+        salesRevenue.length >= 2
+    ) {
+
+        const latest =
+            salesRevenue[
+                salesRevenue.length - 1
+            ];
+
+        const previous =
+            salesRevenue[
+                salesRevenue.length - 2
+            ];
+
+
+        if (latest > previous) {
+
+            insights.push({
+
+                title:
+                    "Recent revenue movement",
+
+                text:
+                    `The latest recorded sales date
+                    shows higher revenue than the
+                    previous recorded date.`
+
+            });
+
+        }
+        else if (latest < previous) {
+
+            insights.push({
+
+                title:
+                    "Recent revenue movement",
+
+                text:
+                    `The latest recorded sales date
+                    shows lower revenue than the
+                    previous recorded date.`
+
+            });
+
+        }
+        else {
+
+            insights.push({
+
+                title:
+                    "Recent revenue movement",
+
+                text:
+                    `Revenue is unchanged between the
+                    latest two recorded sales dates.`
+
+            });
+
+        }
+
+    }
+    else {
+
+        insights.push({
+
+            title:
+                "Revenue trend",
+
+            text:
+                "More sales dates are required before
+                a meaningful revenue trend can be
+                identified."
+
+        });
+
+    }
+
+
+    // ---------------------------------------------
+    // CATEGORY WITH MOST STOCK
+    // ---------------------------------------------
+
+    if (
+        categoryLabels.length > 0
+    ) {
+
+        let maximumIndex = 0;
+
+
+        for (
+            let i = 1;
+            i < categoryValues.length;
+            i++
+        ) {
+
+            if (
+                categoryValues[i]
+                >
+                categoryValues[maximumIndex]
+            ) {
+
+                maximumIndex = i;
+
+            }
+
+        }
+
+
+        insights.push({
+
+            title:
+                "Stock concentration",
+
+            text:
+                `${categoryLabels[maximumIndex]}
+                contains the largest recorded
+                share of inventory at
+                ${categoryValues[maximumIndex]}
+                units.`
+
+        });
+
+    }
+
+
+    // ---------------------------------------------
+    // FORECAST INSIGHT
+    // ---------------------------------------------
+
+    const forecastRows = [
+
+        {% for item in forecast_data %}
+
+        {
+
+            name:
+                {{ item.name|tojson }},
+
+            status:
+                {{ item.status|tojson }},
+
+            additional:
+                {% if item.additional_stock
+                      is not none %}
+                    {{ item.additional_stock|float }}
+                {% else %}
+                    null
+                {% endif %}
+
+        }
+
+        {% if not loop.last %},{% endif %}
+
+        {% endfor %}
+
+    ];
+
+
+    const restockItems =
+        forecastRows.filter(
+
+            item =>
+                item.status ===
+                "RESTOCK REQUIRED"
+
+        );
+
+
+    if (
+        restockItems.length > 0
+    ) {
+
+        insights.push({
+
+            title:
+                "Forecast-driven restocking",
+
+            text:
+                `${restockItems.length}
+                product${restockItems.length > 1
+                    ? "s are"
+                    : " is"}
+                currently flagged by the
+                forecast/reorder engine for
+                additional stock.`
+
+        });
+
+    }
+    else {
+
+        insights.push({
+
+            title:
+                "Forecast-driven inventory",
+
+            text:
+                "No product is currently flagged
+                for forecast-driven restocking."
+
+        });
+
+    }
+
+
+    // ---------------------------------------------
+    // DISPLAY INSIGHTS
+    // ---------------------------------------------
+
+    insightList.innerHTML = "";
+
+
+    insights.forEach(
+        function(insight) {
+
+            const box =
+                document.createElement(
+                    "div"
+                );
+
+
+            box.className =
+                "insight";
+
+
+            const title =
+                document.createElement(
+                    "div"
+                );
+
+
+            title.className =
+                "insight-title";
+
+
+            title.textContent =
+                insight.title;
+
+
+            const text =
+                document.createElement(
+                    "div"
+                );
+
+
+            text.className =
+                "insight-text";
+
+
+            text.textContent =
+                insight.text
+                    .replace(
+                        /\s+/g,
+                        " "
+                    )
+                    .trim();
+
+
+            box.appendChild(title);
+
+            box.appendChild(text);
+
+            insightList.appendChild(box);
+
+        }
+    );
+
+
+</script>
+
+{% endblock %}

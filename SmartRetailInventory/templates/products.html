@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}
+Products | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Products
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:15px;
+        flex-wrap:wrap;
+        margin-bottom:25px;
+    ">
+
+        <div>
+
+            <h2 style="margin-bottom:6px;">
+                Product Inventory
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+            ">
+                Manage products, stock, suppliers and expiry dates.
+            </p>
+
+        </div>
+
+
+        <a
+            href="/add-product"
+            class="button"
+        >
+            + Add Product
+        </a>
+
+    </div>
+
+
+    {% if products %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Expiry Date</th>
+                    <th>Expiry Status</th>
+                    <th>Action</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for product in products %}
+
+                <tr>
+
+                    <td>
+                        {{ product.product_id }}
+                    </td>
+
+
+                    <td style="font-weight:600;">
+                        {{ product.name }}
+                    </td>
+
+
+                    <td>
+                        {{ product.category }}
+                    </td>
+
+
+                    <td>
+
+                        {{ product.supplier }}
+
+                        {% if product.supplier_contact %}
+
+                        <br>
+
+                        <small style="color:#94a3b8;">
+                            {{ product.supplier_contact }}
+                        </small>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+                        ₹{{ product.price }}
+                    </td>
+
+
+                    <td>
+
+                        {% if product.stock < 10 %}
+
+                        <span class="status low">
+                            {{ product.stock }}
+                        </span>
+
+                        {% else %}
+
+                        {{ product.stock }}
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if product.expiry_date %}
+
+                            {{ product.expiry_date }}
+
+                        {% else %}
+
+                            —
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if product.expiry_date %}
+
+                            {% if product.days_to_expiry < 0 %}
+
+                                <span class="status danger">
+                                    Expired
+                                </span>
+
+                            {% elif product.days_to_expiry <= 7 %}
+
+                                <span class="status danger">
+                                    Critical
+                                </span>
+
+                            {% elif product.days_to_expiry <= 30 %}
+
+                                <span class="status low">
+                                    Expiring Soon
+                                </span>
+
+                            {% else %}
+
+                                <span class="status success">
+                                    Safe
+                                </span>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            <span class="status">
+                                No Expiry
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('edit_product_page', product_id=product.product_id) }}"
+                            class="button"
+                            style="padding:8px 12px;"
+                        >
+                            Edit
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    {% else %}
+
+    <div class="empty">
+
+        <h3>
+            No Products Found
+        </h3>
+
+        <p style="margin:10px 0 20px;">
+            Add your first product to the inventory.
+        </p>
+
+        <a
+            href="/add-product"
+            class="button"
+        >
+            Add Product
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

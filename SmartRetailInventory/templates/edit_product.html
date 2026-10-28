@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}
+Edit Product | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Edit Product
+{% endblock %}
+
+
+{% block content %}
+
+<div class="card">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:15px;
+        margin-bottom:25px;
+    ">
+
+        <div>
+
+            <h2>
+                Edit Product
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+                margin-top:6px;
+            ">
+                Update inventory, supplier or expiry information.
+            </p>
+
+        </div>
+
+        <a
+            href="/products"
+            class="button button-secondary"
+        >
+            Back to Products
+        </a>
+
+    </div>
+
+
+    {% if message %}
+
+    <div class="message">
+        {{ message }}
+    </div>
+
+    {% endif %}
+
+
+    <form
+        method="POST"
+        action="{{ url_for('edit_product_page', product_id=product.product_id) }}"
+    >
+
+        <div class="form-grid">
+
+
+            <!-- PRODUCT NAME -->
+
+            <div class="form-group">
+
+                <label for="name">
+                    Product Name
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ values.get('name', product.name) }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="form-group">
+
+                <label for="category">
+                    Category
+                </label>
+
+                <input
+                    type="text"
+                    id="category"
+                    name="category"
+                    value="{{ values.get('category', product.category or '') }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- SUPPLIER -->
+
+            <div class="form-group">
+
+                <label for="supplier">
+                    Supplier Name
+                </label>
+
+                <input
+                    type="text"
+                    id="supplier"
+                    name="supplier"
+                    value="{{ values.get('supplier', product.supplier or '') }}"
+                >
+
+            </div>
+
+
+            <!-- SUPPLIER CONTACT -->
+
+            <div class="form-group">
+
+                <label for="supplier_contact">
+                    Supplier Contact
+                </label>
+
+                <input
+                    type="text"
+                    id="supplier_contact"
+                    name="supplier_contact"
+                    value="{{ values.get('supplier_contact', product.supplier_contact or '') }}"
+                >
+
+            </div>
+
+
+            <!-- PRICE -->
+
+            <div class="form-group">
+
+                <label for="price">
+                    Price (₹)
+                </label>
+
+                <input
+                    type="number"
+                    id="price"
+                    name="price"
+                    min="0"
+                    step="0.01"
+                    value="{{ values.get('price', product.price) }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- STOCK -->
+
+            <div class="form-group">
+
+                <label for="stock">
+                    Current Stock
+                </label>
+
+                <input
+                    type="number"
+                    id="stock"
+                    name="stock"
+                    min="0"
+                    value="{{ values.get('stock', product.stock) }}"
+                    required
+                >
+
+            </div>
+
+
+            <!-- EXPIRY DATE -->
+
+            <div class="form-group">
+
+                <label for="expiry_date">
+                    Expiry Date
+                </label>
+
+                <input
+                    type="date"
+                    id="expiry_date"
+                    name="expiry_date"
+                    value="{{ values.get('expiry_date', expiry_value) }}"
+                >
+
+                <small style="
+                    display:block;
+                    margin-top:7px;
+                    color:#64748b;
+                    font-size:11px;
+                ">
+                    Clear this field if the product has no expiry date.
+                </small>
+
+            </div>
+
+
+            <!-- EXISTING PRODUCT ID -->
+
+            <div class="form-group">
+
+                <label>
+                    Product ID
+                </label>
+
+                <input
+                    type="text"
+                    value="{{ product.product_id }}"
+                    readonly
+                    style="
+                        background:#f1f5f9;
+                        color:#64748b;
+                    "
+                >
+
+            </div>
+
+
+            <!-- SAVE -->
+
+            <div class="full-width"
+                 style="
+                    display:flex;
+                    gap:12px;
+                    flex-wrap:wrap;
+                 ">
+
+                <button
+                    type="submit"
+                    class="button"
+                >
+                    Save Changes
+                </button>
+
+                <a
+                    href="/products"
+                    class="button button-secondary"
+                >
+                    Cancel
+                </a>
+
+            </div>
+
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

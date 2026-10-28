@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+Invoice {{ filename }} | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Invoice
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
+    ">
+
+        <div>
+
+            <h2 style="margin-bottom:5px;">
+                {{ filename }}
+            </h2>
+
+            <p style="
+                color:#64748b;
+                font-size:13px;
+            ">
+                Sales invoice details
+            </p>
+
+        </div>
+
+
+        <a
+            href="/invoices"
+            class="button"
+        >
+            ← Back
+        </a>
+
+    </div>
+
+
+    <div style="
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        border-radius:10px;
+        padding:30px;
+
+        white-space:pre-wrap;
+
+        font-family:Consolas,monospace;
+
+        font-size:14px;
+
+        line-height:1.7;
+
+        overflow-x:auto;
+    ">
+
+        {{ invoice }}
+
+    </div>
+
+</div>
+
+{% endblock %}

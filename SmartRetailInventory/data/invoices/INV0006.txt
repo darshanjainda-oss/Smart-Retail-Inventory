@@ -1,0 +1,45 @@
+
+========================================
+        SMART RETAIL STORE
+           SALES INVOICE
+========================================
+
+Invoice No : INV0006
+Date       : 26-10-2026 15:50
+
+Customer Name  : Daksh Sharma
+Customer Phone : 8783774897
+
+----------------------------------------
+PRODUCT DETAILS
+----------------------------------------
+
+Product ID : 5
+Product    : moong dal
+Category   : grocery
+Expiry Date: N/A
+
+Quantity   : 100
+Unit Price : ₹39.00
+
+----------------------------------------
+BILL BREAKDOWN
+----------------------------------------
+
+Subtotal                  : ₹3900.00
+Discount (0.00%)  : ₹0.00
+Taxable Amount             : ₹3900.00
+GST Rate                   : 12.00%
+Supply Type                : Intra-state (CGST + SGST)
+CGST (6.00%)            : ₹234.00
+SGST (6.00%)            : ₹234.00
+Total GST                  : ₹468.00
+----------------------------------------
+FINAL AMOUNT               : ₹4368.00
+----------------------------------------
+
+Remaining Stock            : 877
+
+========================================
+       THANK YOU! VISIT AGAIN
+========================================

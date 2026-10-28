@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}
+Customers | Smart Retail Inventory
+{% endblock %}
+
+{% block page_title %}
+Customers
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+
+    <h2>
+        Customer Management
+    </h2>
+
+    <p style="
+        color:#64748b;
+        font-size:13px;
+        margin-bottom:25px;
+    ">
+        Customer records and purchasing information.
+    </p>
+
+
+    {% if customers %}
+
+    <div class="table-wrapper">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Total Orders</th>
+                    <th>Total Spent</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for customer in customers %}
+
+                <tr>
+
+                    <td>
+                        {{ customer.customer_id }}
+                    </td>
+
+                    <td style="font-weight:600;">
+                        {{ customer.name }}
+                    </td>
+
+                    <td>
+                        {{ customer.phone }}
+                    </td>
+
+                    <td>
+                        {{ customer.total_orders }}
+                    </td>
+
+                    <td style="font-weight:600;">
+                        ₹{{ customer.total_spent }}
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+        <div class="empty">
+            No customers found.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

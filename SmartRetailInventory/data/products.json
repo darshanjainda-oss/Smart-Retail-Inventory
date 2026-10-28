@@ -1,0 +1,29 @@
+[
+    {
+        "id": "P001",
+        "name": "rice",
+        "category": "grocery",
+        "supplier": "ABC supplier",
+        "supplier_contact": "8878987xxx",
+        "price": 40.0,
+        "stock": 10
+    },
+    {
+        "id": "P002",
+        "name": "sugar",
+        "category": "Grocery",
+        "supplier": "ABC",
+        "supplier_contact": "9876543210",
+        "price": 55.0,
+        "stock": 40
+    },
+    {
+        "id": "P003",
+        "name": "wheat grain",
+        "category": "grocery",
+        "supplier": "ABC",
+        "supplier_contact": "9876543210",
+        "price": 78.0,
+        "stock": 60
+    }
+]
